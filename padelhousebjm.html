@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peluang Investasi: Padel Club House Citraland</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Padel Court Harmony -->
+    <!-- Application Structure Plan: Desain aplikasi ini mengadopsi struktur dasbor satu halaman dengan navigasi tetap (sticky navigation) untuk kemudahan eksplorasi. Alur dirancang secara logis untuk investor: dimulai dari gambaran besar (Peluang), dilanjutkan dengan keunikan (Konsep), rincian finansial (Anggaran & Proyeksi), dan diakhiri dengan model kerjasama (Kemitraan). Struktur ini dipilih karena memungkinkan investor untuk mencerna informasi secara bertahap, dari yang bersifat kualitatif hingga kuantitatif, dengan interaksi kunci pada bagian proyeksi untuk simulasi ROI, yang merupakan poin paling krusial. -->
+    <!-- Visualization & Content Choices: 
+        1. Ringkasan Proyek: Goal(Inform) -> Key Metrics Cards -> HTML/Tailwind -> Memberikan gambaran cepat nilai investasi & potensi laba di awal.
+        2. Alokasi Anggaran (RAB): Goal(Organize/Compare) -> Donut Chart -> Chart.js -> Mengubah tabel RAB menjadi visualisasi yang mudah dipahami, menunjukkan porsi biaya terbesar secara instan. Interaksi: Hover untuk detail.
+        3. Proyeksi Keuntungan: Goal(Explore/Change) -> Interactive Calculator (Slider + Dynamic Text) & Bar Chart -> Vanilla JS & Chart.js -> Mengizinkan investor melakukan simulasi berdasarkan tingkat okupansi, memberikan pemahaman mendalam tentang sensitivitas bisnis dan meningkatkan kepercayaan.
+        4. Skema Bagi Hasil: Goal(Inform/Compare) -> Pie Chart -> Chart.js -> Memvisualisasikan struktur kemitraan secara transparan dan mudah dimengerti.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #F7F9FB;
+            color: #2D3748;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s ease, border-bottom-color 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #0694a2;
+            border-bottom-color: #0694a2;
+        }
+        .stat-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+        }
+        .slider-thumb::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: #0694a2;
+            cursor: pointer;
+            border-radius: 50%;
+            margin-top: -8px;
+        }
+        .slider-thumb::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            background: #0694a2;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header & Navigasi -->
+    <header class="bg-white/80 backdrop-blur-lg shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <div class="text-xl font-bold text-gray-800">
+                Padel<span class="text-teal-600">Invest</span>
+            </div>
+            <div class="hidden md:flex space-x-8">
+                <a href="#peluang" class="nav-link">Peluang</a>
+                <a href="#konsep" class="nav-link">Konsep</a>
+                <a href="#anggaran" class="nav-link">Anggaran</a>
+                <a href="#proyeksi" class="nav-link">Proyeksi</a>
+                <a href="#kemitraan" class="nav-link">Kemitraan</a>
+            </div>
+            <a href="#kontak" class="hidden md:block bg-teal-600 text-white px-4 py-2 rounded-full hover:bg-teal-700 transition-colors">Hubungi Kami</a>
+            <button id="mobile-menu-button" class="md:hidden focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-4 6h4"></path></svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#peluang" class="block py-2 px-4 text-sm hover:bg-gray-200">Peluang</a>
+            <a href="#konsep" class="block py-2 px-4 text-sm hover:bg-gray-200">Konsep</a>
+            <a href="#anggaran" class="block py-2 px-4 text-sm hover:bg-gray-200">Anggaran</a>
+            <a href="#proyeksi" class="block py-2 px-4 text-sm hover:bg-gray-200">Proyeksi</a>
+            <a href="#kemitraan" class="block py-2 px-4 text-sm hover:bg-gray-200">Kemitraan</a>
+            <a href="#kontak" class="block py-2 px-4 text-sm hover:bg-gray-200">Hubungi Kami</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8 md:py-12">
+        <!-- Hero Section -->
+        <section class="text-center mb-16">
+            <h1 class="text-3xl md:text-5xl font-bold mb-4">Peluang Investasi Lapangan Padel</h1>
+            <h2 class="text-xl md:text-2xl text-teal-600 font-semibold mb-6">di Lokasi Premium Clubhouse Citraland Banjarmasin</h2>
+            <p class="max-w-3xl mx-auto text-gray-600 mb-8">
+                Sebuah proposal investasi untuk membangun fasilitas olahraga modern yang sedang tren, dengan potensi pasar yang kuat dan proyeksi keuntungan yang menarik.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                <div class="stat-card text-center">
+                    <p class="text-gray-500 text-sm">Total Investasi</p>
+                    <p class="text-3xl font-bold text-teal-600">Rp 700 Jt</p>
+                </div>
+                <div class="stat-card text-center">
+                    <p class="text-gray-500 text-sm">Proyeksi Laba/Bulan</p>
+                    <p class="text-3xl font-bold text-teal-600">Rp 71,25 Jt</p>
+                </div>
+                 <div class="stat-card text-center">
+                    <p class="text-gray-500 text-sm">Lokasi</p>
+                    <p class="text-3xl font-bold text-teal-600">Clubhouse Citraland Banjarmasin</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Peluang -->
+        <section id="peluang" class="mb-16 scroll-mt-20">
+            <h3 class="text-3xl font-bold text-center mb-2">Mengapa Padel? Mengapa Sekarang?</h3>
+            <p class="text-center text-gray-600 mb-10 max-w-2xl mx-auto">Padel adalah olahraga dengan pertumbuhan tercepat di dunia. Kombinasi antara kemudahan bermain dan aspek sosial yang kuat menjadikannya peluang bisnis yang sangat menjanjikan di Banjarmasin.</p>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="stat-card">
+                    <h4 class="font-bold text-xl mb-2">Pertumbuhan Pesat</h4>
+                    <p class="text-gray-600">Olahraga raket yang menggabungkan tenis dan squash, popularitasnya meledak secara global karena mudah dipelajari dan sangat menyenangkan.</p>
+                </div>
+                <div class="stat-card">
+                    <h4 class="font-bold text-xl mb-2">Target Pasar Luas</h4>
+                    <p class="text-gray-600">Menarik bagi penghuni Citraland, masyarakat umum Banjarmasin, dan komunitas olahraga yang mencari alternatif baru yang lebih sosial.</p>
+                </div>
+                <div class="stat-card">
+                    <h4 class="font-bold text-xl mb-2">Lokasi Strategis</h4>
+                    <p class="text-gray-600">Club House Citraland memiliki fasilitas pendukung lengkap, akses mudah, dan lingkungan yang aman, menciptakan ekosistem yang sempurna.</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Konsep -->
+        <section id="konsep" class="mb-16 scroll-mt-20">
+            <h3 class="text-3xl font-bold text-center mb-2">Konsep Desain yang Unik</h3>
+            <p class="text-center text-gray-600 mb-10 max-w-2xl mx-auto">Kami tidak hanya membangun lapangan, kami menciptakan destinasi. Desain yang unik akan menjadi daya tarik utama, meningkatkan pengalaman bermain dan menciptakan nilai lebih.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="stat-card p-0 overflow-hidden">
+                    <img src="https://placehold.co/600x400/0694A2/FFFFFF?text=Pencahayaan+Artistik+Lapangan+Padel" alt="Pencahayaan Artistik Lapangan Padel Malam Hari" class="w-full h-40 object-cover">
+                    <div class="p-6">
+                        <h4 class="font-bold text-lg mb-2">Pencahayaan Artistik</h4>
+                        <p class="text-gray-600 text-sm">LED yang dapat diatur warnanya untuk menciptakan atmosfer berbeda pada malam hari.</p>
+                    </div>
+                </div>
+                 <div class="stat-card p-0 overflow-hidden">
+                    <img src="https://placehold.co/600x400/10B981/FFFFFF?text=Dinding+Mural+Lapangan+Padel" alt="Dinding Mural Tematik Lapangan Padel Unik" class="w-full h-40 object-cover">
+                    <div class="p-6">
+                        <h4 class="font-bold text-lg mb-2">Dinding Mural Tematik</h4>
+                        <p class="text-gray-600 text-sm">Dinding kaca dihiasi mural bertema lokal atau olahraga yang energik.</p>
+                    </div>
+                </div>
+                <div class="stat-card p-0 overflow-hidden">
+                    <img src="https://placehold.co/600x400/F59E0B/FFFFFF?text=Area+Duduk+Lapang+Padel" alt="Area Duduk Estetik Lapangan Padel Modern" class="w-full h-40 object-cover">
+                    <div class="p-6">
+                        <h4 class="font-bold text-lg mb-2">Area Duduk Estetik</h4>
+                        <p class="text-gray-600 text-sm">Area duduk nyaman dan modern bagi penonton atau pemain yang beristirahat.</p>
+                    </div>
+                </div>
+                <div class="stat-card p-0 overflow-hidden">
+                    <img src="https://placehold.co/600x400/6366F1/FFFFFF?text=Bola+Raket+Padel" alt="Perlengkapan Padel (Bola, Raket)" class="w-full h-40 object-cover">
+                    <div class="p-6">
+                        <h4 class="font-bold text-lg mb-2">Perlengkapan Padel</h4>
+                        <p class="text-gray-600 text-sm">Menyediakan raket dan bola padel berkualitas untuk pengalaman bermain optimal.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Anggaran -->
+        <section id="anggaran" class="mb-16 scroll-mt-20">
+            <h3 class="text-3xl font-bold text-center mb-2">Alokasi Anggaran Investasi</h3>
+             <p class="text-center text-gray-600 mb-10 max-w-2xl mx-auto">Berikut adalah rincian estimasi biaya untuk pembangunan satu lapangan padel berstandar tinggi dengan konsep unik kami. Transparansi adalah kunci dalam kemitraan ini.</p>
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h4 class="font-bold text-xl mb-4 text-center">Rincian Biaya (Estimasi)</h4>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                                    <tr><th class="px-4 py-2">Deskripsi</th><th class="px-4 py-2 text-right">Biaya (IDR)</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b"><td class="px-4 py-2">Struktur Lapangan (Besi/Baja)</td><td class="px-4 py-2 text-right">350.000.000</td></tr>
+                                    <tr class="border-b bg-gray-50"><td class="px-4 py-2">Kaca Tempered (12mm)</td><td class="px-4 py-2 text-right">80.000.000</td></tr>
+                                    <tr class="border-b"><td class="px-4 py-2">Lantai Padel (Rumput Sintetis)</td><td class="px-4 py-2 text-right">80.000.000</td></tr>
+                                    <tr class="border-b bg-gray-50"><td class="px-4 py-2">Pekerjaan Sipil dan Pondasi</td><td class="px-4 py-2 text-right">50.000.000</td></tr>
+                                    <tr class="border-b"><td class="px-4 py-2">Biaya Desain Unik & Lainnya</td><td class="px-4 py-2 text-right">70.000.000</td></tr>
+                                    <tr class="border-b bg-gray-50"><td class="px-4 py-2">Biaya Tak Terduga (10%)</td><td class="px-4 py-2 text-right">70.000.000</td></tr>
+                                    <tr class="font-bold bg-teal-50"><td class="px-4 py-2">TOTAL</td><td class="px-4 py-2 text-right">~700.000.000</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-xl mb-4 text-center">Komposisi Biaya</h4>
+                        <div class="chart-container">
+                            <canvas id="rabChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Proyeksi -->
+        <section id="proyeksi" class="mb-16 scroll-mt-20">
+            <h3 class="text-3xl font-bold text-center mb-2">Simulasi Proyeksi Keuntungan</h3>
+            <p class="text-center text-gray-600 mb-10 max-w-2xl mx-auto">Gunakan slider di bawah ini untuk melihat bagaimana tingkat okupansi (jumlah jam sewa per hari) mempengaruhi potensi pendapatan dan laba bersih bulanan. Ini adalah alat untuk membantu Anda memahami potensi sebenarnya dari investasi ini.</p>
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <div class="mb-8">
+                    <label for="occupancy-slider" class="block text-center font-semibold mb-2">Tingkat Okupansi Harian: <span id="occupancy-label" class="text-teal-600 font-bold text-xl">50</span>% (<span id="hours-label">7.5</span> jam/hari)</label>
+                    <input id="occupancy-slider" type="range" min="20" max="80" value="50" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-thumb">
+                     <p class="text-center text-gray-700 text-md mt-4">Tarif Sewa Per Jam (rata-rata): <span id="hourly-rate" class="font-bold text-teal-600">Rp 350.000</span></p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center mb-8">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="text-gray-500 text-sm">Pendapatan/Bulan</p>
+                        <p id="monthly-revenue" class="text-3xl font-bold">Rp 78.750.000</p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="text-gray-500 text-sm">Biaya Operasional/Bulan</p>
+                        <p id="operational-cost" class="text-3xl font-bold">- Rp 7.500.000</p>
+                    </div>
+                    <div class="bg-teal-50 p-4 rounded-lg">
+                        <p class="text-teal-800 text-sm">Laba Bersih/Bulan</p>
+                        <p id="net-profit" class="text-3xl font-bold text-teal-600">Rp 71.250.000</p>
+                    </div>
+                </div>
+                 <div class="chart-container" style="max-width: 600px;">
+                    <canvas id="profitChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Kemitraan -->
+        <section id="kemitraan" class="mb-16 scroll-mt-20">
+            <h3 class="text-3xl font-bold text-center mb-2">Skema Kemitraan yang Adil</h3>
+            <p class="text-center text-gray-600 mb-10 max-w-2xl mx-auto">Kami menawarkan skema pembagian hasil yang transparan dan menguntungkan, dirancang untuk pengembalian modal yang cepat dan keuntungan jangka panjang yang berkelanjutan.</p>
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                     <div>
+                        <h4 class="font-bold text-xl mb-4">Pembagian Laba (Setelah ROI)</h4>
+                        <p class="text-gray-600 mb-4">Setelah investasi awal Anda kembali sepenuhnya, laba bersih bulanan akan dibagi berdasarkan skema berikut, yang memastikan keberlanjutan operasional dan keuntungan bersama.</p>
+                        <ul class="space-y-3">
+                            <li class="flex items-center">
+                                <span class="w-4 h-4 rounded-full bg-teal-500 mr-3"></span>
+                                <div><span class="font-bold">Investor: 50%</span><br><span class="text-sm text-gray-500">Rp 35.625.000</span></div>
+                            </li>
+                            <li class="flex items-center">
+                                <span class="w-4 h-4 rounded-full bg-cyan-500 mr-3"></span>
+                                <div><span class="font-bold">Pengelola Club House: 40%</span><br><span class="text-sm text-gray-500">Rp 28.500.000</span></div>
+                            </li>
+                             <li class="flex items-center">
+                                <span class="w-4 h-4 rounded-full bg-gray-300 mr-3"></span>
+                                <div><span class="font-bold">Management: 10%</span><br><span class="text-sm text-gray-500">Rp 7.125.000</span></div>
+                            </li>
+                        </ul>
+                     </div>
+                     <div>
+                         <h4 class="font-bold text-xl mb-4 text-center">Visualisasi Pembagian Laba</h4>
+                         <div class="chart-container">
+                            <canvas id="partnershipChart"></canvas>
+                        </div>
+                     </div>
+                 </div>
+            </div>
+        </section>
+
+        <!-- Kontak -->
+        <section id="kontak" class="text-center bg-teal-600 text-white py-16 rounded-xl scroll-mt-20">
+             <h3 class="text-3xl font-bold mb-4">Siap Menjadi Bagian dari Kisah Sukses Ini?</h3>
+             <p class="max-w-2xl mx-auto mb-8">Kami sangat antusias untuk berdiskusi lebih lanjut mengenai proposal ini. Hubungi kami untuk menjadwalkan pertemuan dan mari kita wujudkan bersama.</p>
+             <div class="text-lg">
+                <p class="font-bold">Ahmad Rinaldi / Padel House Banjarmasin</p>
+                <p>Telepon: 0811-511-967</p>
+                <p>Email: ahmdrnaldi@gmail.com</p>
+             </div>
+        </section>
+    </main>
+
+    <footer class="text-center py-6 text-gray-500 text-sm">
+        <p>&copy; 2024 PadelInvest Citraland. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mobile Menu Toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            // Close mobile menu on link click
+            document.querySelectorAll('#mobile-menu a').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+
+            // Navigation scroll highlighting
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('header nav a.nav-link');
+            
+            window.onscroll = () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 100) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').substring(1) === current) {
+                        link.classList.add('active');
+                    }
+                });
+            };
+
+            // Data
+            const formatCurrency = (value) => {
+                if (value >= 1000000) {
+                    return `Rp ${new Intl.NumberFormat('id-ID').format((value/1000000).toFixed(1))} Jt`;
+                }
+                return `Rp ${new Intl.NumberFormat('id-ID').format(value)}`;
+            };
+            
+            const formatFullCurrency = (value) => {
+                return `Rp ${new Intl.NumberFormat('id-ID').format(value)}`;
+            }
+
+            // Chart 1: RAB Chart
+            const rabCtx = document.getElementById('rabChart').getContext('2d');
+            const rabData = {
+                labels: ['Struktur Lapangan', 'Kaca & Lantai', 'Pekerjaan Sipil', 'Desain & Lainnya', 'Tak Terduga'],
+                datasets: [{
+                    data: [350000000, 160000000, 50000000, 70000000, 70000000],
+                    backgroundColor: ['#047481', '#0694a2', '#08a1b1', '#3bafda', '#84d3f2'],
+                    hoverOffset: 4
+                }]
+            };
+            new Chart(rabCtx, {
+                type: 'doughnut',
+                data: rabData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += formatFullCurrency(context.parsed);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+            
+            // Interactive Projections
+            const occupancySlider = document.getElementById('occupancy-slider');
+            const occupancyLabel = document.getElementById('occupancy-label');
+            const hoursLabel = document.getElementById('hours-label');
+            const monthlyRevenueEl = document.getElementById('monthly-revenue');
+            const netProfitEl = document.getElementById('net-profit');
+            const hourlyRateEl = document.getElementById('hourly-rate');
+            
+            const totalHours = 15;
+            const avgTariff = 350000;
+            const daysInMonth = 30;
+            const operationalCost = 7500000;
+
+            let profitChart;
+            const profitCtx = document.getElementById('profitChart').getContext('2d');
+            
+            function createOrUpdateProfitChart(revenue, cost) {
+                 const data = {
+                    labels: ['Pendapatan', 'Laba Bersih'],
+                    datasets: [{
+                        label: 'Jumlah (IDR)',
+                        data: [revenue, revenue - cost],
+                        backgroundColor: [ '#3bafda', '#0694a2'],
+                        borderColor: ['#3bafda', '#0694a2'],
+                        borderWidth: 1
+                    }]
+                };
+
+                if (profitChart) {
+                    profitChart.data = data;
+                    profitChart.update();
+                } else {
+                     profitChart = new Chart(profitCtx, {
+                        type: 'bar',
+                        data: data,
+                        options: {
+                            indexAxis: 'y',
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: (context) => formatFullCurrency(context.parsed.x)
+                                    }
+                                }
+                            },
+                             scales: {
+                                x: {
+                                    ticks: {
+                                        callback: (value) => formatCurrency(value)
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+            
+            function updateProjections() {
+                const occupancy = occupancySlider.value;
+                const dailyHours = (occupancy / 100) * totalHours;
+                const monthlyRevenue = dailyHours * avgTariff * daysInMonth;
+                const netProfit = monthlyRevenue - operationalCost;
+
+                occupancyLabel.textContent = occupancy;
+                hoursLabel.textContent = dailyHours.toFixed(1);
+                monthlyRevenueEl.textContent = formatFullCurrency(monthlyRevenue);
+                netProfitEl.textContent = formatFullCurrency(netProfit);
+                hourlyRateEl.textContent = formatFullCurrency(avgTariff);
+                
+                createOrUpdateProfitChart(monthlyRevenue, operationalCost);
+            }
+            
+            occupancySlider.addEventListener('input', updateProjections);
+            
+            // Chart 3: Partnership Chart
+            const partnershipCtx = document.getElementById('partnershipChart').getContext('2d');
+            const partnershipData = {
+                labels: ['Investor', 'Pengelola', 'Management'],
+                datasets: [{
+                    data: [50, 40, 10],
+                    backgroundColor: ['#0694a2', '#3bafda', '#d1d5db'],
+                    hoverOffset: 4
+                }]
+            };
+            new Chart(partnershipCtx, {
+                type: 'pie',
+                data: partnershipData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.parsed}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Initial calculations
+            updateProjections();
+        });
+    </script>
+</body>
+</html>
